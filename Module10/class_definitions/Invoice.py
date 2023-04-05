@@ -62,7 +62,6 @@ class Invoice:
             for key in self._items_with_price:
                 item_name = key
                 item_price = self._items_with_price[key]
-                
                 result += f'{item_name:>10}: ${item_price:>8.2f}\n'
         else:
             result += 'No items invoiced.\n'

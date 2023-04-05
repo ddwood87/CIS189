@@ -8,6 +8,8 @@ Assignment: Unit Test a Class
 Date: 03/25/2023
 """
 import unittest
+# I struggled to get python to recognize imports from other packages,
+# but gave up and put this test class in the same package as the tested class
 from Student import Student as s
 
 class Test_Student(unittest.TestCase):
@@ -43,7 +45,7 @@ class Test_Student(unittest.TestCase):
 
     def test_object_not_created_error_last_name(self):
 
-        #that expect exception raised
+        #that expected exception raised
         #Add exception to constructor (not in test!)
         with self.assertRaises(ValueError):
             student = s(2, 'Joe', 'Engineering')
