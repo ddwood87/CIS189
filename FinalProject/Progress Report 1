@@ -1,0 +1,13 @@
+
+I'm building a minesweeper game. 
+I've built a window with a grid of gametiles. 
+I have implemented several standard game difficulties, which range the size of the grid and number of mines.
+Next, I will implement the clicking behavior for the game tiles.
+I plan to use png images on the tiles when they are clicked and exposed. The image will depend on the tile value.
+I will use a Canvas widget to make a 7-segment display to show mine count and a timer.
+I have not been able to figure out why an empty window appears when I run the program. I have the window that I am
+working on and another blank window.
+I hoped to have the game board finished by now, but I was stuck on debugging my grid builder algorithm because I was
+forgetting to update the label with the current value.
+I have been trying to use unit testing and it paid off when I was able to see that the values were different than 
+what was displayed when I was missing a label text update. I will try to continue using unittest to step through each method.

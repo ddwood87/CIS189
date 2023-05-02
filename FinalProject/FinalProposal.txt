@@ -1,0 +1,26 @@
+"""
+Student: Dominic Wood
+Class: CIS189
+CRN: 21906
+Module: 13
+Topic: 3
+Assignment: Final Project Proposal
+Date: 04/18/2023
+"""
+
+Minesweeper
+Because Microsoft took simple Minesweeper away.
+
+MVP:
+    Functioning Minesweeper Grid GUI
+    Mine count display
+    A message window upon winning.
+
+Post-MVP
+    Timer display           
+    Time Trial Leaderboard
+    Multiple standard modes: Beginner, Intermediate, Expert
+    Custom mine count mode
+    Custom grid area mode
+    Filter Leaderboards
+    Save game
