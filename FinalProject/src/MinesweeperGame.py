@@ -10,6 +10,7 @@ Date: 04/20/2023
 import tkinter as tk
 import random
 import numpy as np
+import time
 from MinesweeperGame import *
 from GameTile import GameTile
 import os
@@ -25,7 +26,7 @@ class MineSettings:
         MINES = 'mines'
         standard_modes = {BEGINNER: {ROWS: 10, COLS: 10, MINES: 20},
                           INTERMEDIATE: {ROWS: 20, COLS: 20, MINES: 60},
-                          EXPERT: {ROWS: 40, COLS: 20, MINES: 99}}
+                          EXPERT: {ROWS: 25, COLS: 40, MINES: 150}}
     difficulty: str
     rows: int
     cols: int
@@ -73,19 +74,23 @@ class MineGrid(tk.Frame):
     
     def __init__(self, master, **options):
         super().__init__(master)
-        self.settings = MineSettings()
         if 'difficulty' in options.keys():
-            self.config(difficulty=options['difficulty'])
-        self.current_press = None
-        self.last_press = None
-        self.exposed_tile_count = 0
+            diff = options['difficulty']
+        else:
+            diff = MineSettings.DIFFICULTIES.BEGINNER
+        self.settings = MineSettings(difficulty=diff)
+        self.reset()
 
     def config(self, **options):
-        self.settings.difficulty = options['difficulty']
-        settings = ('rows', 'cols', 'mines')
-        for s in settings:
-            if s in options:
-                self.settings.rows = options[s]
+        if 'difficulty' in options:
+            self.settings = MineSettings(difficulty=options['difficulty'])
+                  
+
+    def reset(self):
+        self.build_grid()           # new game tiles
+        self.current_press = None   # reset variables
+        self.last_press = None
+        self.exposed_tile_count = 0
 
     def get_surrounding_tiles(self, tile: GameTile):
         surround_matrix = {(-1,-1), (-1,0), (-1,1),
@@ -130,16 +135,22 @@ class MineGrid(tk.Frame):
         rows = self.settings.rows
         cols = self.settings.cols
         mines = self.settings.mines
-        spaces_per_mine = rows * cols // mines
         self.game_tiles = dict[(int,int), GameTile]()
-        def rand_spaces() -> int:
-            return random.randint(0, spaces_per_mine/2)
         
+        mines_left = self.settings.mines
+        keys = list[(int,int)]()
+        while mines_left > 0:
+            #random row, random col
+            r = random.randint(0, rows-1)
+            c = random.randint(0, cols-1)
+            if (r,c) not in keys:
+                keys.append((r,c))
+                mines_left -= 1
+
         for r in range(rows):
             for c in range(cols):
-                spaces_til_mine = rand_spaces()
                 mine = False
-                if spaces_til_mine == 0:
+                if (r,c) in keys:
                     mine = True
                 tile = GameTile(self, mine)
                 tile.key = (r,c)
@@ -147,20 +158,24 @@ class MineGrid(tk.Frame):
                 tile.bind_events()
                 self.game_tiles[r,c] = tile
 
+            
         keys = self.game_tiles.keys()
         for k in keys:
             t = self.game_tiles[k]
             t.value = self.count_surrounding_mines(t)
-            #t.update()
-
-    def depress_tile(self, tile: GameTile):
-        tile.depressed = True
-        tile.config(relief=tk.SUNKEN)
 
     def flag_tile(self, tile: GameTile):
         tile.flag_tile()
+        self.master.flag()
+
+    def unflag_tile(self, tile: GameTile):
+        tile.unflag_tile()
+        self.master.unflag()
 
     def primary_click(self, tile: GameTile):
+        if self.exposed_tile_count == 0:
+            self.start_time = time.time()
+            self.master.start()
         if tile.exposed:
             self.exposed_click(tile)         
         else:
@@ -168,7 +183,12 @@ class MineGrid(tk.Frame):
 
     def secondary_click(self, tile: GameTile):
         if not tile.exposed:
-            self.flag_tile(tile)
+            if not tile.flagged:
+                self.flag_tile(tile)
+            else:
+                self.unflag_tile(tile)
+        else:
+            tile.unpress()
 
     def exposed_click(self, tile: GameTile):
         neighbors: list[GameTile]= self.get_surrounding_tiles(tile)
@@ -182,21 +202,15 @@ class MineGrid(tk.Frame):
                     self.expose_zeros(t)
                 if not t.flagged:
                     self.expose(t) 
+                    #self.exposed_tile_count += 1
         self.unpress_surrounding(tile) 
-
-    ''''def expose_zero_neighbors(self, tile: GameTile):
-        zero_neighbor_keys = set()
-        if tile.value == 0:
-            for k in zero_neighbor_keys:
-                t = self.game_tiles[k]
-                if not t.exposed:
-                    self.expose(tile)'''
 
     def expose_surrounding(self, tile: GameTile)-> set:
         surrounding: list[GameTile] = self.get_surrounding_tiles(tile)
         for t in surrounding:            
             if not t.exposed and not t.flagged:
                 self.expose(t)
+                #self.exposed_tile_count += 1
         
     def expose_zeros(self, tile: GameTile, zero_chain: set = None):
         surrounding: list[GameTile] = self.get_surrounding_tiles(tile)
@@ -208,8 +222,9 @@ class MineGrid(tk.Frame):
         for t in surrounding:
             if t.value == 0 and t.key not in zero_chain:
                 zero_chain.add(t.key)
-                t.expose()
-                self.exposed_tile_count += 1
+                if not t.exposed:
+                    t.expose()
+                    #self.exposed_tile_count += 1
                 
                 zero_chain = self.expose_zeros(t, zero_chain)
             elif t.value > 0:
@@ -223,19 +238,22 @@ class MineGrid(tk.Frame):
         return tile_count - self.settings.mines
 
     def expose(self, tile: GameTile):
-        self.exposed_til
-        if tile.value == 0:
-            tile.expose()
-            self.expose_zeros(tile)
-        elif tile.value == -1:
-            self.mine_exposed(tile)
-            tile.expose()
-        else:
-            tile.expose()
-        
-        self.exposed_tile_count += 1
-        safe_tile
-        if self.exposed_tile_count == 
+        if not tile.exposed:
+            if tile.value == 0:
+                tile.expose()
+                #get amount of zeros found
+                zero_count = len(self.expose_zeros(tile))
+                self.exposed_tile_count += zero_count
+            elif tile.value == -1:
+                self.mine_exposed(tile)
+                tile.expose()
+                self.exposed_tile_count += 1
+            else:
+                tile.expose()
+                self.exposed_tile_count += 1
+            
+        if self.exposed_tile_count >= self.safe_tile_count():
+            self.swept_grid()
 
     def press_surrounding(self, tile: GameTile):
         surrounding: list[GameTile] = self.get_surrounding_tiles(tile)
@@ -266,12 +284,15 @@ class MineGrid(tk.Frame):
             #x all incorrect flags
             if t.flagged and t.value != -1:
                 t.incorrect()
+        self.master.game_loss()
 
-        
-
-    
-        
-            
+    def swept_grid(self):
+        # check each tile is exposed or value == -1
+        for k in self.game_tiles:
+            t = self.game_tiles[k]
+            if t.exposed or t.value == -1:
+                t.unbind()
+        self.master.game_win()
 
 
 import unittest as ut
@@ -305,5 +326,4 @@ class test_MineGrid(ut.TestCase):
         self.assertEqual(count, 2)
     
 if __name__=='__main__':
-    #ut.main()
-    pass
+    ut.main()
