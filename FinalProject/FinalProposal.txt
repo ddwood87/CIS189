@@ -12,15 +12,15 @@ Minesweeper
 Because Microsoft took simple Minesweeper away.
 
 MVP:
-    Functioning Minesweeper Grid GUI
-    Mine count display
-    A message window upon winning.
+ x  Functioning Minesweeper Grid GUI
+ x  Mine count display
+ x  A message window upon winning. [subbed a custom game popup]
 
 Post-MVP
-    Timer display           
+ x  Timer display           
     Time Trial Leaderboard
-    Multiple standard modes: Beginner, Intermediate, Expert
-    Custom mine count mode
-    Custom grid area mode
+ x  Multiple standard modes: Beginner, Intermediate, Expert
+ x  Custom mine count mode
+ x  Custom grid area mode
     Filter Leaderboards
     Save game

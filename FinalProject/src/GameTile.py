@@ -1,3 +1,12 @@
+"""
+Student: Dominic Wood
+Class: CIS189
+CRN: 21906
+Module: Final Project
+Topic: Minesweeper Game
+Assignment: Game Tile
+Date: 04/20/2023
+"""
 import tkinter as tk
 
 class GameTile(tk.Frame):
@@ -36,9 +45,9 @@ class GameTile(tk.Frame):
         self.image_label.bind('<ButtonRelease>', '')
 
     def click_press(self, event: tk.Event):
+        self.master.current_key = self.key
+        self.master.active = True
         if not self.flagged:
-            self.master.current_key = self.key
-            self.master.active = True
             if self.exposed:            
                 self.master.press_surrounding(self)
             else:
@@ -62,23 +71,23 @@ class GameTile(tk.Frame):
         self.image_label.bind('<Enter>', '') #unbind enter/leave events for this tile on release
         self.image_label.bind('<Leave>', '')
 
-        if self.key == self.master.current_key and self.master.active:
-            mouse_button = event.num
-            if mouse_button == 1:
-                self.master.primary_click(self)
+        if self.key == self.master.current_key:
+            if self.master.active:
+                mouse_button = event.num
+                if mouse_button == 1:
+                    self.master.primary_click(self)
+                else:
+                    self.master.secondary_click(self)                
             else:
-                self.master.secondary_click(self)                
-        else:
-            self.unpress()
+                self.unpress()
 
         #reset current click status
         self.master.current_key = None
         self.master.active = False
 
-    '''def press_exposed(self):
-        self.master.press_surrounding(self)'''
-
     def expose(self):
+        if self.flagged:
+            self.unflag_tile()
         self.exposed = True
         self.press()
         # no image for zero

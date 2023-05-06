@@ -11,6 +11,7 @@ import tkinter as tk
 from MinesweeperGame import *
 from GameStatusFrame import *
 from MineMenuFrame import *
+from CustomGameWindow import CustomGameWindow
 
 class MainGameWindow(tk.Tk):
     menu_frame: MineMenu
@@ -58,8 +59,12 @@ class MainGameWindow(tk.Tk):
     def unflag(self):
         self.game_status_frame.unflag()
     
+    def get_settings(self):
+        return self.game_grid_frame.settings
+
     def get_mine_count(self):
-        return self.game_grid_frame.settings.mines
+        settings = self.get_settings()
+        return settings.mines
     
     def beginner(self):
         self.game_grid_frame.config(difficulty=MineSettings.DIFFICULTIES.BEGINNER)
@@ -71,6 +76,13 @@ class MainGameWindow(tk.Tk):
 
     def expert(self):
         self.game_grid_frame.config(difficulty=MineSettings.DIFFICULTIES.EXPERT)
+        self.reset_game()
+
+    def custom_diff(self):
+        customize_window = CustomGameWindow(self)
+
+    def new_settings(self, settings: MineSettings):
+        self.game_grid_frame.settings = settings
         self.reset_game()
 
     def exit(self):

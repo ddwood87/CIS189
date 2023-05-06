@@ -4,7 +4,7 @@ Class: CIS189
 CRN: 21906
 Module: Final Project
 Topic: Minesweeper Game
-Assignment: Root Window
+Assignment: Game Status Frame
 Date: 04/20/2023
 """
 import tkinter as tk
@@ -50,10 +50,6 @@ class SegmentChar(tk.Canvas):
 
     def create_segment(self, coords):
         return self.create_polygon(coords, fill=self.off_color)
-        #self.create_rectangle(10,5,25,10, fill=self.color)
-        #arc_coord = 5,7,15,5
-        #triangle = self.create_arc(arc_coord, start=-30, extent=60, fill=self.color)
-        #arc_coord = 5,40,15,45
 
     def create_segments(self):
         self.segments = dict()
@@ -103,6 +99,13 @@ class SegmentDisplay(tk.Frame):
     segment_chars: list[SegmentChar]# 3 sets of segment display
     value: int
     
+    def __init__(self, master):
+        super().__init__(master)
+        self.segment_chars = dict[int, SegmentChar]()
+        for i in range(0,3):
+            self.segment_chars[i] = SegmentChar(self)
+            self.segment_chars[i].pack(side=tk.LEFT)
+
     def update_segments(self, number):
         if number < 1000:
             number_string = str(number)
@@ -131,14 +134,6 @@ class SegmentDisplay(tk.Frame):
                     
         else:
             self.segment_chars[2].update('E')
-
-
-    def __init__(self, master):
-        super().__init__(master)
-        self.segment_chars = dict[int, SegmentChar]()
-        for i in range(0,3):
-            self.segment_chars[i] = SegmentChar(self)
-            self.segment_chars[i].pack(side=tk.LEFT)
         
 class MineDisplay(SegmentDisplay):
     def __init__(self, master):
@@ -162,25 +157,26 @@ class TimerDisplay(SegmentDisplay):
 
     def reset(self):
         self.value = 0
-        self.update_segments(self.value)
+        self.update()
 
 class ResetButton(tk.Button):
     IMAGES = {'reset': 'reset.png',
               'winner': 'winner.png',
               'loser': 'loser.png'}
     IMAGE_DIR = '\\img\\'
-    def get_image(self, image_key):
-        curr_path = os.path.abspath(__file__)
-        curr_dir = os.path.dirname(curr_path)
-        img_dir = curr_dir + self.IMAGE_DIR
-        img_path = img_dir + self.IMAGES[image_key]
-        return tk.PhotoImage(file=img_path)
 
     def __init__(self, master):
         super().__init__(master, command=self.reset)
         img = self.get_image('reset')
         self.image = img
         self.config(image=img) 
+
+    def get_image(self, image_key):
+        curr_path = os.path.abspath(__file__)
+        curr_dir = os.path.dirname(curr_path)
+        img_dir = curr_dir + self.IMAGE_DIR
+        img_path = img_dir + self.IMAGES[image_key]
+        return tk.PhotoImage(file=img_path)
 
     def reset(self):
         self.reset_image()
@@ -211,6 +207,7 @@ class MineStatus(tk.Frame):
     mine_count: int
     def __init__(self, master):
         super().__init__(master)
+        self.play = False
         self.mine_count = self.master.get_mine_count()
         self.mine_count_display = MineDisplay(self)
         self.mine_count_display.update(self.mine_count)
@@ -250,10 +247,8 @@ class MineStatus(tk.Frame):
         self.master.reset_game()
 
     def reset_status(self):
+        self.play = False
         self.reset_button.reset_image()
         self.mine_count = self.master.get_mine_count()
         self.mine_count_display.update(self.mine_count)
         self.timer_display.reset()
-
-if __name__ == '__main__':
-    pass

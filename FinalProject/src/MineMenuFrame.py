@@ -4,7 +4,7 @@ Class: CIS189
 CRN: 21906
 Module: Final Project
 Topic: Minesweeper Game
-Assignment: Root Window
+Assignment: Menu Frame
 Date: 04/20/2023
 """
 import tkinter as tk
@@ -26,7 +26,7 @@ class MineMenu(tk.Frame):
         diff_menu.add_command(label='Beginner',command=self.master.beginner)
         diff_menu.add_command(label='Intermediate',command=self.master.intermediate)
         diff_menu.add_command(label='Expert',command=self.master.expert)
-
+        diff_menu.add_command(label='Custom...', command=self.master.custom_diff)
 
         game_menu.add_separator()
         game_menu.add_command(label='Reset', command=self.master.reset_game)
